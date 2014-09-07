@@ -1,9 +1,15 @@
-.PHONY: mostlyclean clean all serve
+.PHONY: mostlyclean clean all all-data serve
 
-all: output/line-py-versions.png \
+.SECONDARY:
+
+all: all-data \
+	 output/area-total-downloads.png \
+	 output/line-py-versions.png \
 	 output/stacked-py-pct.png \
-	 output/stacked-py3-pct.png \
-	 output/stacked-impl-pct.png
+	 output/stacked-py3-pct.png
+
+all-data: data/python-totals.pkl \
+		  data/python-versions.pkl
 
 serve:
 	mkdir -p output
@@ -17,10 +23,11 @@ clean:
 	rm -rf data
 	rm -rf output
 
-data/data.pkl:
-	bin/load.py
+data/%.pkl:
+	mkdir -p data
+	bin/load-$*.py
 
-data/%.json: data/data.pkl
+data/%.json: all-data
 	bin/json-$*.py
 
 output/%.png: data/%.json

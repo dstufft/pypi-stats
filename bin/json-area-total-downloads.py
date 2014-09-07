@@ -21,7 +21,7 @@ DATA_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "data")
 )
 
-DATA_FILE = os.path.join(DATA_DIR, "python-versions.pkl")
+DATA_FILE = os.path.join(DATA_DIR, "python-totals.pkl")
 
 JOB_NAME = os.path.splitext(os.path.basename(__file__))[0][5:]
 
@@ -34,11 +34,8 @@ with open(DATA_FILE, "rb") as fp:
 
 df = df.resample("W", how="sum")
 
-# Total Percentages of Python Versions
-graph = vincent.StackedArea(df / df.sum(axis=1))
-graph.legend(title="")
-graph.axes["y"].format = "%"
-graph.scales["y"].domain_max = 1.0
+graph = vincent.Area(df.resample("W", how="sum"))
+graph.axes["y"].format = "s"
 
 # Change the interpolation to step-after so our area chart looks blockier
 graph.marks["group"].marks[0].properties.enter.interpolate = vincent.ValueRef(

@@ -21,32 +21,26 @@ DATA_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "data")
 )
 
-DATA_FILE = os.path.join(DATA_DIR, "data.pkl")
+DATA_FILE = os.path.join(DATA_DIR, "python-versions.pkl")
 
 JOB_NAME = os.path.splitext(os.path.basename(__file__))[0][5:]
 
 JSON_FILE = os.path.join(DATA_DIR, "{}.json".format(JOB_NAME))
 
 
-# Load data
 with open(DATA_FILE, "rb") as fp:
-    data_frames = pickle.load(fp)
+    df = pickle.load(fp)
 
 
-# We want a particular stored DataFrame
-df = data_frames["python_version"]
+df = df.resample("W", how="sum")
 
-
-# Adjust the data to fix some problems
-df = df.resample("W")  # TODO: Should we do this by mean or max?
-df = df.fillna(0)
-
-
-# Relative Download Counts of Python Versions
 graph = vincent.Line(df)
 graph.legend(title="")
 graph.axes["y"].format = "s"
+
+# Change the interpolation to step-after so our area chart looks blockier
+graph.marks["group"].marks[0].properties.enter.interpolate = vincent.ValueRef(
+    value="step-after",
+)
+
 graph.to_json(JSON_FILE)
-
-
-print("Created {}".format(JSON_FILE))

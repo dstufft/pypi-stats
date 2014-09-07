@@ -14,35 +14,34 @@ import os
 import os.path
 import pickle
 
-import vincent
+import pandas
+import sqlalchemy
 
 
 DATA_DIR = os.path.abspath(
     os.path.join(os.path.dirname(__file__), "..", "data")
 )
 
-DATA_FILE = os.path.join(DATA_DIR, "python-versions.pkl")
+DATA_FILE = os.path.join(DATA_DIR, "data.pkl")
 
 JOB_NAME = os.path.splitext(os.path.basename(__file__))[0][5:]
 
-JSON_FILE = os.path.join(DATA_DIR, "{}.json".format(JOB_NAME))
+PICKLE_FILE = os.path.join(DATA_DIR, "{}.pkl".format(JOB_NAME))
 
 
-with open(DATA_FILE, "rb") as fp:
-    df = pickle.load(fp)
+engine = sqlalchemy.create_engine(os.environ["STATS_DB"])
 
 
-df = df.resample("W", how="sum")
-
-# Total Percentages of Python Versions
-graph = vincent.StackedArea(df / df.sum(axis=1))
-graph.legend(title="")
-graph.axes["y"].format = "%"
-graph.scales["y"].domain_max = 1.0
-
-# Change the interpolation to step-after so our area chart looks blockier
-graph.marks["group"].marks[0].properties.enter.interpolate = vincent.ValueRef(
-    value="step-after",
+df = pandas.read_sql_query(
+    """ SELECT date_trunc('day', download_time) as date, COUNT(*)
+        FROM downloads
+        GROUP BY date_trunc('day', download_time)
+        ORDER BY date_trunc('day', download_time)
+    """,
+    engine,
+    index_col="date",
 )
 
-graph.to_json(JSON_FILE)
+
+with open(PICKLE_FILE, "wb") as fp:
+    pickle.dump(df, fp)
