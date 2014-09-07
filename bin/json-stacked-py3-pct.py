@@ -38,10 +38,4 @@ df = df.resample("W", how="sum")
 graph = vincent.StackedArea((df / df.sum(axis=1)).ix[:, "3.2":])
 graph.legend(title="")
 graph.axes["y"].format = "%"
-
-# Change the interpolation to step-after so our area chart looks blockier
-graph.marks["group"].marks[0].properties.enter.interpolate = vincent.ValueRef(
-    value="step-after",
-)
-
 graph.to_json(JSON_FILE)
