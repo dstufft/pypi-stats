@@ -1,6 +1,7 @@
 .PHONY: mostlyclean clean all serve
 
-all: output/line-py-versions.png
+all: output/line-py-versions.png \
+	 output/stacked-py-pct.png
 
 serve:
 	mkdir -p output
