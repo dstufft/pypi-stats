@@ -5,10 +5,12 @@
 all: all-data \
 	 output/area-total-downloads.png \
 	 output/line-py-versions.png \
+	 output/stacked-impl-pct.png \
 	 output/stacked-py-pct.png \
 	 output/stacked-py3-pct.png
 
-all-data: data/python-totals.pkl \
+all-data: data/python-impl.pkl \
+		  data/python-totals.pkl \
 		  data/python-versions.pkl
 
 serve:
