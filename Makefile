@@ -2,7 +2,8 @@
 
 all: output/line-py-versions.png \
 	 output/stacked-py-pct.png \
-	 output/stacked-py3-pct.png
+	 output/stacked-py3-pct.png \
+	 output/stacked-impl-pct.png
 
 serve:
 	mkdir -p output

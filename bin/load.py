@@ -24,6 +24,7 @@ engine = sqlalchemy.create_engine(os.environ["STATS_DB"])
 print("Loading Data...")
 
 data_frames = {}
+
 data_frames["python_version"] = pandas.read_sql_query(
     """ SELECT *
         FROM crosstab(
@@ -57,6 +58,31 @@ data_frames["python_version"] = pandas.read_sql_query(
             date timestamp,
             "2.6" int, "2.7" int, "3.2" int, "3.3" int, "3.4" int
         )
+    """,
+    engine,
+    index_col="date",
+)
+
+data_frames["python_type"] = pandas.read_sql_query(
+    """ SELECT *
+        FROM crosstab(
+            '
+                SELECT download_time::date, python_type, COUNT(*)
+                FROM (
+                    SELECT download_time, python_type
+                    FROM downloads
+                    WHERE installer_type = ''pip''
+                      AND installer_version != ''''
+                      AND python_type IN (''cpython'', ''pypy'', ''jython'')
+                ) as s
+                GROUP BY download_time::date, python_type
+                ORDER BY 1, 2;
+            ',
+            '
+                SELECT unnest(ARRAY[''cpython'', ''pypy'', ''jython''])
+            '
+        )
+        AS ct(date timestamp, "CPython" int, "PyPy" int, "Jython" int)
     """,
     engine,
     index_col="date",
